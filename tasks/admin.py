@@ -14,4 +14,4 @@ class TeamAdmin(admin.ModelAdmin):
 
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
-    list_display = ('user','team', 'role')
+    list_display = ('id','user','team', 'role')

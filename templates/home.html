@@ -87,12 +87,7 @@
                             <td class="align-middle">
                                 <h6 class="mb-0"><span class="badge bg-danger">{{ task.priority }}</span></h6>
                             </td>
-                            <td class="align-middle">
-                                <a href="{% url 'mark_task_as_done' task.id %}" data-mdb-tooltip-init title="Done"><i
-                                        class="fas fa-check fa-lg text-success me-3"></i></a>
-                                <a href="{% url 'remove_task' task.id %}" data-mdb-tooltip-init title="Remove"><i
-                                        class="fas fa-trash-alt fa-lg text-warning"></i></a>
-                            </td>
+
                         </tr>
                         {% endfor %}
                     </tbody>

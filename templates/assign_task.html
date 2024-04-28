@@ -23,7 +23,7 @@
                 <div class="row mb-4 pb-2 pb-md-0 mb-md-5">
                     <div class="col-md-6">
                         <label for="team">Choose Team</label>
-                        <select class="form-select" name="team" id="team">
+                        <select class="form-select" name="team" id="select-team">
                             {% for team in teams %}
                             <option value="{{ team.id }}">{{ team.name }}</option>
                             {% endfor %}
@@ -32,7 +32,6 @@
                     <div class="col-md-6">
                         <label for="assigned_to_user">Assign To</label>
                         <select class="form-select" name="assigned_to_user" id="assigned_to_user">
-                            <option value=""></option>
                             {% for member in members %}
                                 <option value="{{ member.id }}">{{ member.user.username }}</option>
                             {% endfor %}
@@ -61,7 +60,7 @@
                     <select class="form-select" name="status" id="status">
                         <option value="todo">To Do</option>
                         <option value="in_progress">In Progress</option>
-                        <option value="done">Done</option>
+                        <option value="complete">Complete</option>
                     </select>
                 </div>
   
@@ -77,22 +76,47 @@
     </div>
   </section>
   <script>
-    async function updateMembers() {
-        let teamId = document.getElementById('team').value;
-        let url = `/team_members/${teamId}/`;  // URL to fetch team members
-        await fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                let select = document.getElementById('assigned_to_user');
-                select.innerHTML = '';  // Clear existing options
-                data.forEach(member => {
-                    let option = document.createElement('option');
-                    option.value = member.id;
-                    option.textContent = member.username;
-                    select.appendChild(option);
-                });
-            });
+    var selectTeam = document.getElementById("select-team");
+    console.log("selectTeam", selectTeam);
+
+    (async function() {
+    if (selectTeam.value) {
+        await getMembers(selectTeam.value);
     }
-    updateMembers()
-    </script>
+    })();
+
+    // Adding Event Listener to team dropdown
+    async function getMembers(id) {
+        await appendMembers(id);
+        selectTeam.addEventListener("input", async (ev) => {
+        console.log("TEAM ID:", ev.target.value);
+        let teamID = ev.target.value;
+        await appendMembers(teamID);
+    });
+    }
+
+    //fetching memebrs based on team
+    async function appendMembers(id) {
+        try {
+            let teamID = id;
+            const response = await fetch(`/team_members/${teamID}/`);
+            // const result = await response.json();  // Assuming the server returns JSON
+            const result = await response.json()
+            console.log("result",result)
+            let select = document.getElementById('assigned_to_user');
+            console.log("select", select)
+            select.innerHTML = '';  // Clear existing options
+            result.forEach(member => {
+                let option = document.createElement('option');
+                option.value = member.id;
+                option.textContent = member.username;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Fetch error:", error);
+        }
+    }
+
+</script>
+
   {% endblock content %}

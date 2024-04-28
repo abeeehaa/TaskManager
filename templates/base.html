@@ -34,7 +34,7 @@
                 <li class="nav-item">
                     <form id="logoutForm" action="{% url 'logout' %}" method="post">
                         {% csrf_token %}
-                        <a class="nav-link" href="#" onclick="document.getElementById('logoutForm').submit();">Logout</a>
+                        <button class="nav-link" href="#" type="submit">Logout</button>
                     </form>
                 </li>
             </ul>

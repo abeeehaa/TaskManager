@@ -106,8 +106,10 @@ class MyTeamsListView(LoginRequiredMixin, ListView):
         teams = Team.objects.filter(pk__in=teams_as_member)
         return teams
     
+    
 
-class TeamDetailView(LoginRequiredMixin, DetailView):
+
+class TeamDetailView(LoginRequiredMixin, View):
     model = Team
     template_name = 'team_details.html'
     context_object_name = 'team'
@@ -119,19 +121,24 @@ class TeamDetailView(LoginRequiredMixin, DetailView):
         context['members'] = members
         return context
 
-# from django.http import JsonResponse
-class TeamMembersView(DetailView):
-    model = Team
-    template_name = 'assign_task.html'
-    context_object_name = 'members'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        team = self.get_object()
+
+from django.http import JsonResponse
+class TeamMembersView(View):
+    def get(self, request, *args, **kwargs):
+        team_id = kwargs.get('pk')  # Assumes that the team ID is passed as a URL parameter
+        team = Team.objects.get(pk=team_id)
         members = TeamMember.objects.filter(team=team)
-        print(members)
-        context['members'] = members
-        return context
+        res = []
+        for member in members:
+            res.append(
+              {"id": member.id,
+               "username": member.user.username,
+               }  
+            )
+        # Serialize the member data
+        members_data = list(members.values('id', 'team', 'user'))  # Modify fields as necessary
+        return JsonResponse(res, safe=False)  # safe=False is needed to serialize a list
 
 class AssignTaskView(LoginRequiredMixin, View):
     template_name = 'assign_task.html'
@@ -145,9 +152,9 @@ class AssignTaskView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
     
     def post(self, request):
-        team_id = request.POST.get('team')
-        team = Team.objects.get(id=team_id)
-        team_members = TeamMember.objects.filter(team=team)
+        # team_id = request.POST.get('team')
+        # team = Team.objects.get(id=team_id)
+        # team_members = TeamMember.objects.filter(team=team)
         
         # Assuming Task model has fields: title, description, due_date, priority, status
         title = request.POST.get('title')
@@ -158,6 +165,7 @@ class AssignTaskView(LoginRequiredMixin, View):
 
         # Create the task
         task = Task.objects.create(
+            assigned_by=request.user,
             title=title,
             description=description,
             due_date=due_date,
@@ -166,9 +174,9 @@ class AssignTaskView(LoginRequiredMixin, View):
         )
 
         # Assign the task to a team member
-        assigned_member_id = request.POST.get('assigned_member')
+        assigned_member_id = request.POST.get('assigned_to_user')
         assigned_member = TeamMember.objects.get(id=assigned_member_id)
         task.assigned_to_user = assigned_member.user
         task.save()
 
-        return redirect('task_list')
+        return redirect('task_list', status='all')
