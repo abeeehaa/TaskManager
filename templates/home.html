@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-
-    <div class="container mt-5">
+<section class="gradient-custom">
+    <div class="container pt-5">
         <div class="row">
           <div class="col-md-3">
             <a href="{% url 'task_list' status='all' %}" class="text-decoration-none">
@@ -85,8 +85,15 @@
                                 <span>{{ task.title }}</span>
                             </td>
                             <td class="align-middle">
-                                <h6 class="mb-0"><span class="badge bg-danger">{{ task.priority }}</span></h6>
+                                <h6 class="mb-0"><span class="badge bg-primary">{{ task.priority }}</span></h6>
                             </td>
+                            <td>
+                              <form method="POST" action="{% url 'delete_task' pk=task.pk %}">
+                                  {% csrf_token %}
+                                  <button type="submit" class="btn btn-danger">Delete</button>
+                              </form>
+                              <a href="{% url 'update_task' pk=task.pk %}" class="btn btn-success ms-1">Edit</a>
+                          </td>
 
                         </tr>
                         {% endfor %}
@@ -101,4 +108,5 @@
           </div>
         </div>
       </section>
+    </section>
     {% endblock content %}

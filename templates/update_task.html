@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="gradient-custom">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-lg-8 col-xl-6">
+                <div class="card rounded-3">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="mb-4 pb-2 pb-md-0 mb-md-5 px-md-2">Update Task</h3>
+
+                        <form class="px-md-2" method="post" action="{% url 'update_task' pk=task.pk %}">
+                            {% csrf_token %}
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <label class="form-label" for="title">Title</label>
+                                <input type="text" class="form-control" name="title" id="title" value="{{ task.title }}">
+                            </div>
+
+                            <div data-mdb-input-init class="form-outline mb-4">
+                                <label class="form-label" for="description">Description</label>
+                                <textarea class="form-control" name="description" id="description">{{ task.description }}</textarea>
+                            </div>
+
+                            <div class="row mb-4 pb-2 pb-md-0 mb-md-5">
+                                <div class="col-md-6">
+                                    <label for="team">Choose Team</label>
+                                    <select class="form-select" name="team" id="select-team">
+                                        {% for team in teams %}
+                                        <option value="{{ team.id }}" {% if team == task.assigned_to_user.team %}selected{% endif %}>{{ team.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="assigned_to_user">Assign To</label>
+                                    <select class="form-select" name="assigned_to_user" id="assigned_to_user">
+                                        {% for member in team_members %}
+                                        <option value="{{ member.id }}" {% if member == task.assigned_to_user %}selected{% endif %}>{{ member.user.username }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div data-mdb-input-init class="form-outline datepicker">
+                                        <label for="due_date">Select due date</label>
+                                        <input type="date" class="form-control" name="due_date" id="due_date" value="{{ task.due_date }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label for="priority">Priority</label>
+                                    <select class="form-select" name="priority" id="priority">
+                                        <option value="low" {% if task.priority == 'low' %}selected{% endif %}>Low</option>
+                                        <option value="medium" {% if task.priority == 'medium' %}selected{% endif %}>Medium</option>
+                                        <option value="high" {% if task.priority == 'high' %}selected{% endif %}>High</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="status">Status</label>
+                                <select class="form-select" name="status" id="status">
+                                    <option value="to_do" {% if task.status == 'to_do' %}selected{% endif %}>To Do</option>
+                                    <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="complete" {% if task.status == 'complete' %}selected{% endif %}>Complete</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-success btn-lg mb-1">Update</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

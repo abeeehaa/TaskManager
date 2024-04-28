@@ -6,9 +6,14 @@ from django.views.generic import ListView
 from .models import Task
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView, DeleteView
 from django.views import View
 from django.contrib import messages
+from django.urls import reverse_lazy
+from django.db.models import Q
+
+from django.http import JsonResponse
+from datetime import datetime
 
 def search_users(request):
     if 'q' in request.GET:
@@ -80,14 +85,20 @@ class TaskListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         status = self.kwargs.get('status')
+        priority = self.kwargs.get('priority')
         if status == 'all':
-            return Task.objects.filter(assigned_to_user=self.request.user)
-        elif status == 'priority':
-            return Task.objects.filter(assigned_to_user=self.request.user, priority='high')
+            tasks = Task.objects.filter(Q(assigned_to_user=self.request.user) | Q(assigned_by=self.request.user))
+            return tasks
+        elif status == 'priority' and priority in ['high', 'medium', 'low']:
+            return Task.objects.filter(priority=priority)
         elif status == 'complete':
             return Task.objects.filter(assigned_to_user=self.request.user, status='complete')
         elif status == 'incomplete':
             return Task.objects.filter(assigned_to_user=self.request.user, status='incomplete')
+        elif status == 'date':
+            date_str = self.request.GET.get('date')
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            return Task.objects.filter(assigned_to_user=self.request.user, due_date=date)
         else:
             return Task.objects.none()
 
@@ -109,7 +120,7 @@ class MyTeamsListView(LoginRequiredMixin, ListView):
     
 
 
-class TeamDetailView(LoginRequiredMixin, View):
+class TeamDetailView(LoginRequiredMixin, DetailView):
     model = Team
     template_name = 'team_details.html'
     context_object_name = 'team'
@@ -123,7 +134,6 @@ class TeamDetailView(LoginRequiredMixin, View):
 
 
 
-from django.http import JsonResponse
 class TeamMembersView(View):
     def get(self, request, *args, **kwargs):
         team_id = kwargs.get('pk')  # Assumes that the team ID is passed as a URL parameter
@@ -180,3 +190,55 @@ class AssignTaskView(LoginRequiredMixin, View):
         task.save()
 
         return redirect('task_list', status='all')
+    
+
+class UpdateTaskView(LoginRequiredMixin, View):
+    template_name = 'update_task.html'
+
+    def get(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
+        teams = Team.objects.filter(lead=request.user)
+        assigned_user_team = Team.objects.filter(teammember__user=task.assigned_to_user).first()
+        team_members = TeamMember.objects.filter(team=assigned_user_team)
+
+        context = {
+            'task': task,
+            'teams': teams,
+            'team_members': team_members
+        }
+        return render(request, self.template_name, context)
+    
+    def post(self, request, pk):
+        task = get_object_or_404(Task, pk=pk)
+
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        due_date = request.POST.get('due_date')
+        priority = request.POST.get('priority')
+        status = request.POST.get('status')
+
+        task.title = title
+        task.description = description
+        task.due_date = due_date
+        task.priority = priority
+        task.status = status
+
+        # Assign the task to a team member
+        assigned_member_id = request.POST.get('assigned_to_user')
+        assigned_member = TeamMember.objects.get(id=assigned_member_id)
+        task.assigned_to_user = assigned_member.user
+
+        task.save()
+
+        return redirect('task_list', status='all')
+
+class TaskDeleteView(LoginRequiredMixin, DeleteView):
+    model = Task
+    success_url = reverse_lazy('task_list', kwargs={'status': 'all'})
+
+
+class DeleteTeamView(LoginRequiredMixin, View):
+    def post(self, request, team_id):
+        team = get_object_or_404(Team, id=team_id)
+        team.delete()
+        return redirect('my_teams')
