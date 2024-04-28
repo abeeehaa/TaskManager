@@ -45,7 +45,7 @@
                                 <div class="col-md-6 mb-4">
                                     <div data-mdb-input-init class="form-outline datepicker">
                                         <label for="due_date">Select due date</label>
-                                        <input type="date" class="form-control" name="due_date" id="due_date" value="{{ task.due_date }}">
+                                        <input type="date" class="form-control" name="due_date" id="due_date" value="{{ task.due_date|date:'Y-m-d' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-4">

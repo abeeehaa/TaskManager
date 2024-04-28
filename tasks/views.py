@@ -90,15 +90,26 @@ class TaskListView(LoginRequiredMixin, ListView):
             tasks = Task.objects.filter(Q(assigned_to_user=self.request.user) | Q(assigned_by=self.request.user))
             return tasks
         elif status == 'priority' and priority in ['high', 'medium', 'low']:
-            return Task.objects.filter(priority=priority)
+            return Task.objects.filter(
+                Q(priority=priority) & 
+                (Q(assigned_by=self.request.user) | Q(assigned_to_user=self.request.user))
+            )
         elif status == 'complete':
-            return Task.objects.filter(assigned_to_user=self.request.user, status='complete')
+            return Task.objects.filter(
+                Q(status='complete') & 
+                (Q(assigned_by=self.request.user) | Q(assigned_to_user=self.request.user))
+            )
         elif status == 'incomplete':
-            return Task.objects.filter(assigned_to_user=self.request.user, status='incomplete')
+            return Task.objects.filter(
+                Q(status__in=['incomplete', 'to_do', 'in_progress']) &
+                (Q(assigned_by=self.request.user) | Q(assigned_to_user=self.request.user))
+            )
         elif status == 'date':
             date_str = self.request.GET.get('date')
             date = datetime.strptime(date_str, '%Y-%m-%d').date()
-            return Task.objects.filter(assigned_to_user=self.request.user, due_date=date)
+            return Task.objects.filter(
+                assigned_to_user=self.request.user, due_date=date
+            )
         else:
             return Task.objects.none()
 
@@ -162,11 +173,7 @@ class AssignTaskView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
     
     def post(self, request):
-        # team_id = request.POST.get('team')
-        # team = Team.objects.get(id=team_id)
-        # team_members = TeamMember.objects.filter(team=team)
-        
-        # Assuming Task model has fields: title, description, due_date, priority, status
+
         title = request.POST.get('title')
         description = request.POST.get('description')
         due_date = request.POST.get('due_date')
