@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+    <div class="container mt-5">
+        <div class="row">
+          <div class="col-md-3">
+            <a href="{% url 'task_list' status='all' %}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Tasks</h5>
+                        <p class="card-text">{{ total_tasks }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'task_list' status='priority' %}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Priority Tasks</h5>
+                        <p class="card-text">{{ priority_tasks }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'task_list' status='complete' %}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Complete Tasks</h5>
+                        <p class="card-text">{{ complete_tasks }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3">
+            <a href="{% url 'task_list' status='incomplete' %}" class="text-decoration-none">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Incomplete Tasks</h5>
+                        <p class="card-text">{{ incomplete_tasks }}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        
+        </div>
+    </div>
+    <section class="vh-100 gradient-custom-2">
+        <div class="container py-5 h-100">
+          <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-md-12 col-xl-10">
+              <div class="text-center mt-4">
+                <a href="{% url 'task_list' status='all' %}" class="btn btn-primary">View All Tasks</a>
+            </div>
+
+              <div class="card mask-custom">
+                <div class="card-body p-4 text-white">
+      
+                  <div class="text-center pt-3 pb-2">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-todo-list/check1.webp"
+                      alt="Check" width="60">
+                    <h2 class="my-4">Task List</h2>
+                  </div>
+      
+                  <table class="table text-white mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Team Member</th>
+                            <th scope="col">Task</th>
+                            <th scope="col">Priority</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr class="fw-normal">
+                            <th>
+                                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp"
+                                    alt="avatar 1" style="width: 45px; height: auto;">
+                                <span class="ms-2">{{ task.assigned_to_user.username }}</span>
+                            </th>
+                            <td class="align-middle">
+                                <span>{{ task.title }}</span>
+                            </td>
+                            <td class="align-middle">
+                                <h6 class="mb-0"><span class="badge bg-danger">{{ task.priority }}</span></h6>
+                            </td>
+                            <td class="align-middle">
+                                <a href="{% url 'mark_task_as_done' task.id %}" data-mdb-tooltip-init title="Done"><i
+                                        class="fas fa-check fa-lg text-success me-3"></i></a>
+                                <a href="{% url 'remove_task' task.id %}" data-mdb-tooltip-init title="Remove"><i
+                                        class="fas fa-trash-alt fa-lg text-warning"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+      
+      
+                </div>
+              </div>
+      
+            </div>
+          </div>
+        </div>
+      </section>
+    {% endblock content %}

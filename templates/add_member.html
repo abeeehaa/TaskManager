@@ -1,0 +1,6 @@
+<form method="post">
+    {% csrf_token %}
+    <a href="{% url 'search_users' %}">Search for users</a>
+    <input type="text" name="username" placeholder="Enter username">
+    <button type="submit">Add Member</button>
+</form>

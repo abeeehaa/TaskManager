@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="vh-100 gradient-custom">
+  <div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col col-xl-10">
+        <div class="scroll-area-sm">
+          <perfect-scrollbar class="ps-show-limits">
+            <div class="card">
+              <div class="card-body p-5">
+                <ul class="nav nav-tabs mb-4 pb-2" id="ex1" role="tablist">
+                  <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="ex1-tab-1" data-mdb-tab-init href="#ex1-tabs-1" role="tab"
+                      aria-controls="ex1-tabs-1" aria-selected="true" onclick="changeTab('ex1-tabs-1')">{{ request.user.username }}'s Teams</a>
+                  </li>
+                </ul>
+                <ul class="list-group mb-0">
+                  
+                  {% for team in teams %}
+                  <div class="todo-indicator bg-warning"></div>
+                  <li class="list-group-item d-flex align-items-center border-0 mb-2 rounded" style="background-color: #f4f6f7;">
+                    <a href="{% url 'team_details' team.id %}">{{ team.name }}</a>
+                  </li>
+                  {% endfor %}
+                </ul>
+
+              </div>
+            </div>
+          </perfect-scrollbar>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}
+
+
